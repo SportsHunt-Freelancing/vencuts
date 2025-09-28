@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vencuts</title>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
+    <style>
+        :root {
+            --light-bg: #f5f5f5;
+            --dark-bg: #1a1a1a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Instrument Serif', serif;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 8vw, 6rem);
+            font-weight: 700;
+            line-height: 0.9;
+            letter-spacing: -0.02em;
+        }
+
+        section {
+            width: 100vw;
+            height: 100vh;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .intro, .outro {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--light-bg);
+            color: var(--dark-bg);
+        }
+
+        .intro h1, .outro h1 {
+            width: 50%;
+            text-align: center;
+        }
+
+        .spotlight {
+            background: var(--dark-bg);
+            color: var(--light-bg);
+            position: relative;
+        }
+
+        .spotlight-images {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .image {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 650px; 
+            height: auto; 
+            transform: translate(-50%, -50%) translateZ(-2000px) scale(0);
+            will-change: transform;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .spotlight-cover-image {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 440px; /* Increased by 10% from 400px */
+            height: auto; /* Increased by 10% from 300px */
+            transform: translate(-50%, -50%) translateZ(-2000px) scale(0);
+            will-change: transform;
+            border-radius: 12px;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+
+        .intro-header, .outro-header {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .intro-header {
+            z-index: 1;
+        }
+
+        .outro-header {
+            z-index: 3;
+        }
+
+        .word {
+            display: inline-block;
+            margin-right: 0.3em;
+        }
+
+        @media (max-width: 1000px) {
+            .intro h1, .outro h1, .intro-header, .outro-header {
+                width: 80%;
+                padding: 0 1rem;
+            }
+
+            .image {
+                width: 500px; /* Increased by 10% from 250px */
+                height: auto; /* Maintain aspect ratio */
+            }
+
+            .spotlight-cover-image {
+                width: 320px;
+                height: auto; /* Maintain aspect ratio */
+            }
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-bg);
+            color: var(--light-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            font-family: 'Instrument Serif', serif;
+            font-size: 2rem;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loading-screen">
+        Loading... <span id="loading-percentage">0%</span>
+    </div>
+
+    <section class="intro">
+        <h1>Vencuts Media</h1>
+    </section>
+
+    <section class="spotlight">
+        <div class="spotlight-images">
+            <div class="image">
+                <img src="IMG_3524.WEBP" alt="guy">
+            </div>
+            <div class="image">
+                <img src="IMG_3522.PNG" alt="umami">
+            </div>
+            <div class="image">
+                <img src="IMG_3521.PNG" alt="dream a dozen">
+            </div>
+            <div class="image">
+                <img src="IMG_3517.JPG" alt="marriage">
+            </div>
+            <div class="image">
+                <img src="IMG_3511.JPG" alt="binge">
+            </div>
+            <div class="image">
+                <img src="IMG_3510.JPG" alt="nmims">
+            </div>
+        </div>
+
+        <div class="spotlight-cover-image">
+            <img src="IMG_2683.JPG" alt="Hero mountain">
+        </div>
+
+        <div class="intro-header">
+            <h1>The Moments We Capture</h1>
+        </div>
+
+        <div class="outro-header">
+            <h1>The Stories We Create</h1>
+        </div>
+    </section>
+
+    <section class="outro">
+        <h1>Where Every Moment Tells A Story</h1>
+    </section>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Register GSAP plugins
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Initialize spotlight animations
+            initSpotlightAnimations();
+
+            // Re-initialize on window resize
+            window.addEventListener('resize', () => {
+                ScrollTrigger.refresh();
+                initSpotlightAnimations();
+            });
+
+            function initSpotlightAnimations() {
+                // Clear existing ScrollTriggers
+                ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+
+                // Get DOM elements
+                const images = document.querySelectorAll('.spotlight .image');
+                const coverImage = document.querySelector('.spotlight-cover-image');
+                const introHeader = document.querySelector('.intro-header h1');
+                const outroHeader = document.querySelector('.outro-header h1');
+
+                // Split text function
+                function splitText(element) {
+                    const text = element.textContent;
+                    const words = text.split(' ');
+                    element.innerHTML = words.map(word => `<span class="word">${word}</span>`).join(' ');
+                    return element.querySelectorAll('.word');
+                }
+
+                // Split intro and outro headers
+                const introWords = splitText(introHeader);
+                const outroWords = splitText(outroHeader);
+
+                // Set initial states
+                gsap.set(introWords, { opacity: 1 });
+                gsap.set(outroWords, { opacity: 0 });
+                gsap.set(outroHeader, { opacity: 1 });
+
+
+                const directions = [
+                    { x: -1, y: -0.5 },
+                    { x: 1, y: -0.7 },
+                    { x: -0.8, y: 0.6 },
+                    { x: 0.9, y: 0.4 },
+                    { x: -0.6, y: -0.8 },
+                    { x: 0.7, y: -0.3 },
+                    { x: -0.4, y: 0.9 },
+                    { x: 0.5, y: 0.8 }
+                ];
+
+                // Get screen dimensions
+                const screenWidth = window.innerWidth;
+                const screenHeight = window.innerHeight;
+
+                // Mobile detection and scatter multiplier
+                const isMobile = screenWidth < 1000;
+                const scatterMultiplier = isMobile ? 2.5 : 1.5;
+                const scaleMultiplier = isMobile ? 3 : 2;
+
+                // Define start positions (all images start at center, deep in background)
+                const startPositions = {
+                    x: 0,
+                    y: 0,
+                    z: -2000,
+                    scale: 0
+                };
+
+                // Define end positions for each image
+                const endPositions = images.length > 0 ? Array.from(images).map((_, index) => {
+                    const direction = directions[index % directions.length];
+                    return {
+                        x: direction.x * screenWidth * scatterMultiplier,
+                        y: direction.y * screenHeight * scatterMultiplier,
+                        z: 500,
+                        scale: 1
+                    };
+                }) : [];
+
+                // Set initial positions for all images
+                images.forEach(image => {
+                    gsap.set(image, {
+                        x: startPositions.x,
+                        y: startPositions.y,
+                        z: startPositions.z,
+                        scale: startPositions.scale
+                    });
+                });
+
+                // Set initial position for cover image
+                gsap.set(coverImage, {
+                    x: 0,
+                    y: 0,
+                    z: -2000,
+                    scale: 0
+                });
+
+                // Main scroll trigger animation
+                ScrollTrigger.create({
+                    trigger: '.spotlight',
+                    start: 'top top',
+                    end: '+=1500%',
+                    pin: true,
+                    pinSpacing: true,
+                    scrub: 1,
+                    onUpdate: function(self) {
+                        const progress = self.progress;
+
+                        // Animate gallery images
+                        images.forEach((image, index) => {
+                            // Calculate stagger delay
+                            const staggerDelay = index * 0.02;
+                            
+                            // Calculate individual progress for this image
+                            let imageProgress = (progress - staggerDelay) * scaleMultiplier;
+                            imageProgress = Math.max(0, Math.min(1, imageProgress));
+
+                            // Get start and end positions
+                            const startPos = startPositions;
+                            const endPos = endPositions[index] || startPos;
+
+                            // Interpolate between start and end positions
+                            const currentX = startPos.x + (endPos.x - startPos.x) * imageProgress;
+                            const currentY = startPos.y + (endPos.y - startPos.y) * imageProgress;
+                            const currentZ = startPos.z + (endPos.z - startPos.z) * imageProgress;
+                            const currentScale = startPos.scale + (endPos.scale - startPos.scale) * imageProgress;
+
+                            // Apply transform
+                            gsap.set(image, {
+                                x: currentX,
+                                y: currentY,
+                                z: currentZ,
+                                scale: currentScale
+                            });
+                        });
+
+                        // Animate cover image (appears later in the sequence)
+                        const coverStart = 0.7;
+                        const coverProgress = Math.max(0, (progress - coverStart) / (1 - coverStart));
+                        const coverZ = -2000 + (1000 * coverProgress);
+                        const coverScale = coverProgress;
+
+                        gsap.set(coverImage, {
+                            z: coverZ,
+                            scale: coverScale
+                        });
+
+                        // Animate intro text fade out (60% to 75%)
+                        if (progress >= 0.6 && progress <= 0.75) {
+                            const fadeProgress = (progress - 0.6) / 0.15;
+                            
+                            introWords.forEach((word, index) => {
+                                const wordDelay = index / introWords.length;
+                                const wordProgress = Math.max(0, Math.min(1, (fadeProgress - wordDelay) * 2));
+                                const opacity = 1 - wordProgress;
+                                gsap.set(word, { opacity });
+                            });
+                        } else if (progress < 0.6) {
+                            gsap.set(introWords, { opacity: 1 });
+                        } else if (progress > 0.75) {
+                            gsap.set(introWords, { opacity: 0 });
+                        }
+
+                        // Animate outro text fade in (80% to 95%)
+                        if (progress >= 0.8 && progress <= 0.95) {
+                            const fadeProgress = (progress - 0.8) / 0.15;
+                            
+                            outroWords.forEach((word, index) => {
+                                const wordDelay = index / outroWords.length;
+                                const wordProgress = Math.max(0, Math.min(1, (fadeProgress - wordDelay) * 2));
+                                gsap.set(word, { opacity: wordProgress });
+                            });
+                        } else if (progress < 0.8) {
+                            gsap.set(outroWords, { opacity: 0 });
+                        } else if (progress > 0.95) {
+                            gsap.set(outroWords, { opacity: 1 });
+                        }
+                    }
+                });
+
+                // Mouse movement effect
+                document.addEventListener('mousemove', (event) => {
+                    const { clientX, clientY } = event;
+                    const centerX = window.innerWidth / 2;
+                    const centerY = window.innerHeight / 2;
+
+
+                    const localX = (clientX - centerX) / centerX; 
+                    const localY = (clientY - centerY) / centerY; // Range: -1 to 1
+
+                    // Define max movement range for bias
+                    const maxRange = 20; // Maximum movement in pixels
+
+                    images.forEach((image, index) => {
+                        const direction = directions[index % directions.length];
+                        const currentX = gsap.getProperty(image, 'x'); // Get current X position from GSAP
+                        const currentY = gsap.getProperty(image, 'y'); // Get current Y position from GSAP
+
+                        // Calculate bias within the max range
+                        const biasedX = currentX + localX * maxRange * 0.5; // Apply small bias to X direction
+                        const biasedY = currentY + localY * maxRange * 0.5; // Apply small bias to Y direction
+
+                        gsap.to(image, {
+                            x: biasedX,
+                            y: biasedY,
+                            duration: 0.2, // Smooth transition
+                            overwrite: true
+                        });
+                    });
+                });
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadingScreen = document.getElementById('loading-screen');
+            const loadingPercentage = document.getElementById('loading-percentage');
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 1;
+                loadingPercentage.textContent = `${progress}%`;
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    loadingScreen.classList.add('hidden');
+                }
+            }, 30); // Adjust speed by changing the interval time
+        });
+    </script>
+</body>
+</html>
