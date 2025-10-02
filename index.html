@@ -59,6 +59,71 @@
             text-align: center;
         }
 
+        /* Contact Section Styles */
+        .contact {
+            flex-direction: column;
+            gap: 3rem;
+        }
+
+        .contact-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .contact h1 {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .contact-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .contact-item {
+            text-align: center;
+        }
+
+        .contact-item h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .contact-item p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            opacity: 0.8;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
+
+        .social-links a {
+            color: var(--dark-bg);
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: opacity 0.3s ease;
+            border-bottom: 1px solid transparent;
+        }
+
+        .social-links a:hover {
+            opacity: 0.7;
+            border-bottom-color: var(--dark-bg);
+        }
+
         .spotlight {
             background: var(--dark-bg);
             color: var(--light-bg);
@@ -127,6 +192,20 @@
             .intro h1, .outro h1, .intro-header, .outro-header {
                 width: 80%;
                 padding: 0 1rem;
+            }
+
+            .contact-details {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .contact h1 {
+                width: 80%;
+                margin-bottom: 2rem;
+            }
+
+            .social-links {
+                flex-wrap: wrap;
             }
 
             .image {
@@ -207,8 +286,30 @@
         </div>
     </section>
 
-    <section class="outro">
-        <h1>Where Every Moment Tells A Story</h1>
+    <section class="outro contact">
+        <div class="contact-content">
+            <h1>Let's Create Together</h1>
+            <div class="contact-details">
+                <div class="contact-item">
+                    <h3>General Inquiries</h3>
+                    <p>Vencutsmedia@gmail.com</p>
+                </div>
+                <div class="contact-item">
+                    <h3>Business Contact</h3>
+                    <p>Venkateswaran@vencutsmedia.com</p>
+                </div>
+                <div class="contact-item">
+                    <h3>Phone</h3>
+                    <p>+91 6383867668</p>
+                </div>
+                <div class="contact-item">
+                    <h3>Follow Us</h3>
+                    <div class="social-links">
+                        <a href="https://www.instagram.com/venkat_esh_waran?igsh=MW03cmQwZXJkb2x4YQ%3D%3D&utm_source=qr" target="_blank">Instagram</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
     <script>
