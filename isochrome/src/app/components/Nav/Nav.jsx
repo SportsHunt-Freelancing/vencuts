@@ -1,15 +1,18 @@
 "use client";
 import "./Nav.css";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import gsap from "gsap";
 import CustomEase from "gsap/dist/CustomEase";
 import { useTransitionRouter } from "next-view-transitions";
 
+const SCROLL_THRESHOLD = 10;
+const MAX_PENDING_DELTA = 500;
+const HERO_SCROLL_DELAY = 300;
+
 const Nav = () => {
   const router = useTransitionRouter();
-  const pathname =
-    typeof window !== "undefined" ? window.location.pathname : "/";
+  const [pathname, setPathname] = useState("/");
 
   const navRef = useRef(null);
   const menuOverlayRef = useRef(null);
@@ -17,6 +20,11 @@ const Nav = () => {
   const menuOpenBtnRef = useRef(null);
   const menuCloseBtnRef = useRef(null);
   const menuFooterRef = useRef(null);
+  const isMenuOpenRef = useRef(false);
+  const pendingDeltaRef = useRef(0);
+  const frameRequestedRef = useRef(false);
+  const prefersReducedMotionRef = useRef(false);
+  const scrollTimeoutRef = useRef(null);
 
   function slideInOut() {
     document.documentElement.animate(
@@ -56,7 +64,10 @@ const Nav = () => {
     );
   }
 
-  const handleCloseMenu = () => {
+  const handleCloseMenu = useCallback(() => {
+    if (!isMenuOpenRef.current) return;
+    isMenuOpenRef.current = false;
+
     if (
       !menuOverlayBarRef.current ||
       !menuCloseBtnRef.current ||
@@ -130,9 +141,11 @@ const Nav = () => {
         ease: CustomEase.create("", ".76,0,.2,1"),
       }
     );
-  };
+  }, []);
 
-  const handleOpenMenu = () => {
+  const handleOpenMenu = useCallback(() => {
+    if (isMenuOpenRef.current) return;
+
     if (
       !navRef.current ||
       !menuOpenBtnRef.current ||
@@ -143,6 +156,8 @@ const Nav = () => {
     ) {
       return;
     }
+
+    isMenuOpenRef.current = true;
 
     gsap.to(
       [
@@ -194,7 +209,7 @@ const Nav = () => {
         ease: CustomEase.create("", ".76,0,.2,1"),
       }
     );
-  };
+  }, []);
 
   useEffect(() => {
     gsap.registerPlugin(CustomEase);
@@ -219,6 +234,87 @@ const Nav = () => {
       }
 
       router.events?.off("routeChangeStart", handleCloseMenu);
+    };
+  }, [router, handleOpenMenu, handleCloseMenu]);
+
+  useEffect(() => {
+    if (pathname !== "/" || typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    prefersReducedMotionRef.current = mediaQuery.matches;
+
+    const handleMotionChange = (event) => {
+      prefersReducedMotionRef.current = event.matches;
+    };
+
+    mediaQuery.addEventListener("change", handleMotionChange);
+
+    const handleWheelScroll = (event) => {
+      pendingDeltaRef.current += event.deltaY;
+      pendingDeltaRef.current = Math.max(
+        -MAX_PENDING_DELTA,
+        Math.min(MAX_PENDING_DELTA, pendingDeltaRef.current)
+      );
+      if (frameRequestedRef.current) return;
+
+      frameRequestedRef.current = true;
+
+      requestAnimationFrame(() => {
+        frameRequestedRef.current = false;
+        const delta = pendingDeltaRef.current;
+        pendingDeltaRef.current = 0;
+        if (Math.abs(delta) < SCROLL_THRESHOLD) return;
+
+        if (delta > 0 && !isMenuOpenRef.current) {
+          handleOpenMenu();
+        } else if (delta < 0 && isMenuOpenRef.current) {
+          handleCloseMenu();
+          if (scrollTimeoutRef.current) {
+            clearTimeout(scrollTimeoutRef.current);
+          }
+
+          scrollTimeoutRef.current = setTimeout(() => {
+            window.scrollTo({
+              top: 0,
+              behavior: prefersReducedMotionRef.current ? "auto" : "smooth",
+            });
+          }, HERO_SCROLL_DELAY);
+        }
+      });
+    };
+
+    window.addEventListener("wheel", handleWheelScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("wheel", handleWheelScroll);
+      mediaQuery.removeEventListener("change", handleMotionChange);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [pathname, handleOpenMenu, handleCloseMenu]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setPathname(window.location.pathname);
+    }
+
+    const updatePathname = (url) => {
+      try {
+        const nextPathname = new URL(
+          url,
+          typeof window !== "undefined" ? window.location.origin : "http://localhost"
+        ).pathname;
+        setPathname(nextPathname);
+      } catch {
+        setPathname("/");
+      }
+    };
+
+    router.events?.on("routeChangeComplete", updatePathname);
+
+    return () => {
+      router.events?.off("routeChangeComplete", updatePathname);
     };
   }, [router]);
 
