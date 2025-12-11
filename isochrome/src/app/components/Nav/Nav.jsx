@@ -318,6 +318,12 @@ const Nav = () => {
     };
   }, [router]);
 
+  useEffect(() => {
+    if (pathname !== "/" && isMenuOpenRef.current) {
+      handleCloseMenu();
+    }
+  }, [pathname, handleCloseMenu]);
+
   const handleNavigation = (e, path) => {
     e.preventDefault();
 
